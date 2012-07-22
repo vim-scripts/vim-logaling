@@ -1,0 +1,11 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=4144
+
+This is a front-end of logaling-command.
+logaling-command is a glossary management tool written by Ruby.
+See GitHub project page: https://github.com/logaling/logaling-command
+
+You can run logaling-command in Vim.
+
+For MS Windows user, please let me know this plugin can be run on Windows or not.
+
+GitHub repository: https://github.com/tacahiroy/vim-logaling

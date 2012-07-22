@@ -1,0 +1,289 @@
+*loga.txt*  A logaling-command wrapper
+
+vim-logaling
+Version: 0.4.5-015
+Author:  tacahiroy <https://github.com/tacahiroy>
+
+
+==============================================================================
+CONTENTS					*loga-contents*
+
+|loga-intro|		Introduction
+|loga-commands|		Commands
+|loga-settings|		Settings
+|loga-mappings|		Mappings
+|loga-buffer|		Logaling Buffer
+|loga-thanks|		Thanks
+|loga-license|		License
+|loga-about|		About
+|loga-history|		History
+
+
+==============================================================================
+INTRODUCTION					*loga-intro*
+
+vim-logaling は、シンプルな logaling-command のフロントエンドです。
+現在、logaling-command 0.1.5 に対応しています。
+Vim 7.2 以上で動作します。
+
+このプラグインは、|compatible| がセットされていない場合に限り動作します。
+{Vi は、いくつかの機能を有していません。}
+
+
+==============================================================================
+COMMANDS					*loga-commands*
+
+logaling-command を実行し、[logaling] バッファに表示します。
+logaling バッファの内容を元に、'add', 'update', 'delete' コマンドを実行する
+ことも可能です。
+
+						*loga-:Loga*
+:Loga {command} [args]
+	任意の logaling-command を実行可能です。
+	:!loga {command} [options] と似たようなものです。
+
+						*loga-:Ladd* *loga-add*
+:Ladd {SOURCE-TERM} {TARGET-TERM} [NOTE]
+	'loga add' を実行します。
+
+						*loga-:Lupdate* *loga-update*
+:Lupdate {SOURCE-TERM} {TARGET-TERM} {new TARGET-TERM} [NOTE] [options]
+	'loga update' を実行します。
+
+						*loga-:Ldelete* *loga-delete*
+:Ldelete {SOURCE-TERM} [TARGET-TERM] [--force] [options]
+	'loga delete' を実行します。
+
+						*loga-:Lhelp* *loga-help*
+:Lhelp {command}
+	'loga help' を実行します。
+
+						*loga-:Llookup* *loga-lookup*
+:Llookup {term} [options]
+	'loga lookup' を実行します。
+
+						*loga-:Llookupd* *loga-lookupd*
+:Llookupd {term} [options]
+	'loga lookup' を '--dict' オプション付きで実行します。
+
+						*loga-:Lshow* *loga-show*
+:Lshow [options]
+	'loga show' を実行します。
+
+						*loga-:LBopen*
+:LBopen
+	[logaling] バッファを開きます。
+
+
+------------------------------------------------------------------------------
+以下のコマンドは、[logaling] バッファ内でのみ使用可能です。
+
+						*loga-:LBadd* *loga-buffer-add*
+:LBadd [--test]
+	行の内容を引数として、'loga add' を実行します。
+	次のパターンをデリミタとして行を分轄します。
+	NOTE: 次の文字はエスケープされます:
+
+	'\(){}<> '	シェル的に意味のある文字
+	|g:loga_delimiter| に設定されている文字列(デフォルト:(//))
+	\s\{11,}	SOURCE-TERM と TARGET-TERM の区切り
+	\t#		TARGET-TERM と NOTE の区切り
+
+	--test コマンドがどのように実行されるかを表示して終了します。
+
+						*loga-:LBupdate* *loga-buffer-update*
+:LBupdate [--test]
+	行の内容を引数として、'loga update' を実行します。
+	その他の動作は、|:LBadd| と同様です。
+
+						*loga-:LBdelete* *loga-buffer-delete*
+:LBdelete [--test]
+	行の内容を引数として、'loga delete' を実行します。
+	'NOTE' (\t#.*$) は無視されるため、削除する必要はありません。
+	その他の動作は、|:LBadd| と同様です。
+
+
+==============================================================================
+SETTINGS					*loga-settings*
+設定により、vim-logaling のいくつかの挙動を変更することができます。
+
+
+						*g:loga_executable*
+loga コマンドのパスを指定してください。loga コマンドが、サーチパスに存在し
+ない場合は指定する必要があります。
+>
+	let g:loga_executable = 'loga'
+<
+
+						*g:loga_result_window_hsplit*
+結果ウィンドウの分轄方向を制御することができます。
+1 に設定されている場合は水平方向、
+0 に設定されている場合は垂直方向に分轄して開きます。
+>
+	let g:loga_result_window_hsplit = 1
+<
+
+						*g:loga_result_window_size*
+結果ウィンドウのサイズ(幅/高さ)を制御することができます。
+整数値を指定してください。
+>
+	let g:loga_result_window_size = 5
+<
+
+						*g:loga_enable_auto_lookup*
+カーソル下の単語を自動的に検索(lookup)するかどうかを指定します。
+1 に設定されている場合、自動検索が有効となります。
+>
+	let g:loga_enable_auto_lookup = 0
+<
+NOTE: 自動検索を開始する時間は、|updatetime| に依存するため、短めに設定する
+と良いかもしれません。
+>
+	set updatetime=1000
+<
+
+						*g:loga_delimiter*
+行実行時の、SOURCE-TERM, TARGET-TERM, NOTE のデリミタを指定します。
+|:Lshow|, |:Llookup| の結果出力の以下のパターンも、内部的にデリミタとみなします。
+\s\{11,}	SOURCE-TERM と TARGET-TERM の区切り
+\t#		TARGET-TERM と NOTE の区切り
+
+>
+	let g:loga_delimiter = '(//)'
+<
+
+
+==============================================================================
+MAPPINGS					*loga-mappings*
+以下のマッピングを提供しています。
+
+						*<Plug>(loga-lookup)*
+<Plug>(loga-lookup)
+カーソル下の単語、または、選択中の文字列で 'loga lookup' を実行します。
+
+						*<Plug>(loga-insert-delimiter)*
+<Plug>(loga-insert-delimiter)
+デリミタを入力します。デリミタは、|g:loga_delimiter| で指定された値です。
+
+
+デフォルトで設定されるキーマッピングは以下の通りです。
+
+[グローバル]
+mode	key		mapping
+--------------------------------------------------
+n	<Leader>f	<Plug>(loga-lookup)
+v	<Leader>f	<Plug>(loga-lookup)
+
+
+[logalingバッファ]
+--------------------------------------------------
+i	<Leader>v	<Plug>(loga-insert-delimiter)
+
+
+==============================================================================
+LOGALING BUFFER					*loga-buffer*
+各コマンドの実行結果は、バッファ [logaling] に表示されます。
+このバッファ内で、行の内容を引数として 'add', 'update', 'delete' コマンドを
+実行することができます。次のようにします。
+
+
+[訳語を更新する]
+  Window           ウィンドウ	# 窓の意
+を
+  Window           ウィンドー　	# 窓の意
+に更新したい場合
+
+1. |:Llookup| window
+2. 以下のように編集
+>
+  Window           ウィンドウ(//)ウインドー	# 窓の意 
+<
+3. 当該行で、|:LBupdate| コマンドを実行
+
+
+[用語を追加する]
+1. |:LBopen|
+2. [logaling] バッファ内で編集
+>
+  coffee(//)コーヒー(//)飲料の名前
+<
+3. 当該行で、|:LBadd| コマンドを実行
+
+
+[用語を削除する]
+1. |:Llookup| coffee
+2. 当該行で、 |:LBdelete| コマンドを実行
+
+
+==============================================================================
+TODO						*loga-todo*
+- Windows で動くかどうかわかりません
+
+
+==============================================================================
+THANKS						*loga-thanks*
+
+vim-logaling は、実装にあたり、以下のプラグインを(程よく)参考にしました:
+
+[vim-quickrun]
+Author: thinca
+URL: https://github.com/thinca/vim-quickrun
+
+[vim-ref]
+Author: thinca
+URL: https://github.com/thinca/vim-ref
+
+感謝^3^
+
+
+==============================================================================
+LICENSE						*loga-license*
+
+vim-logaling は、MIT License の下でリリースされます:
+
+Copyright 2012 Takahiro YOSHIHARA
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+The software is provided "as is", without warranty of any kind, express or
+implied, including but not limited to the warranties of merchantability,
+fitness for a particular purpose and noninfringement. In no event shall the
+authors or copyright holders be liable for any claim, damages or other
+liability, whether in an action of contract, tort or otherwise, arising from,
+out of or in connection with the software or the use or other dealings in the
+software.
+
+
+==============================================================================
+ABOUT                                           *loga-about*
+
+最新版は、GitHub より入手できます:
+
+https://github.com/tacahiroy/vim-logaling
+
+
+==============================================================================
+HISTORY						*loga-history*
+
+v0.4.5-015	Fix: |:LBadd|, |:LBupdate| and |:LBdelete| commands are disabled
+                     problem
+v0.4.4-014	New: supports `lookup --dict' option: |Llookupd|
+v0.4.3-014	New: supports logaling-command 0.1.4
+v0.4.3-013	New: supports logaling-command 0.1.3
+v0.4.2		Fix: :LBadd doesn't work problem if SOURCE-TERM contains
+		     white-space
+v0.4.1		Fix: highlight only 1st look up word problem
+v0.4.0		New: look-up word highlight.
+v0.3.0		New: execute 'add', 'update' and 'delete' command with line 
+		     contents as arguments.
+v0.1.0		New: minimum functions are implemented.
+
+ vim:tw=78:et:ts=8:ft=help:norl:
